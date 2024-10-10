@@ -1,6 +1,7 @@
 ﻿using SzimulacioLib.Entitasok;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 
 namespace SzimulacioLib
 {
@@ -30,9 +31,9 @@ namespace SzimulacioLib
         private void KezdetiAllapot()
         {
             // Az entitások arányos eloszlása a pálya mérete alapján
-            int algaSzam = meret * meret / 4;
+            int algaSzam = meret * meret / 6;
             int halSzam = meret * meret / 6;
-            int capaSzam = meret * meret / 8;
+            int capaSzam = meret * meret / 60;
 
             // Algák elhelyezése
             for (int i = 0; i < algaSzam; i++)
@@ -53,7 +54,7 @@ namespace SzimulacioLib
             }
         }
 
-        public void Indit()
+        public void Szimulacio()
         {
             int lepesSzamlalo = 0;
             DateTime startTime = DateTime.Now; // Szimuláció kezdeti időpontja
@@ -93,13 +94,26 @@ namespace SzimulacioLib
                     char kijelzo = '.';
                     // Ellenőrizzük, hogy van-e alga, hal vagy cápa ezen a mezőn
                     if (algak.Exists(a => a.X == i && a.Y == j))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
                         kijelzo = 'A';
+                    }
+
                     if (halak.Exists(h => h.X == i && h.Y == j))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
                         kijelzo = 'H';
+                    }
+
                     if (capak.Exists(c => c.X == i && c.Y == j))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
                         kijelzo = 'C';
+                    }
 
                     Console.Write(kijelzo + " ");
+                    Console.ResetColor();
+
                 }
                 Console.WriteLine();
             }
@@ -113,17 +127,14 @@ namespace SzimulacioLib
                 alga.Novekszik();
             }
 
-            // Halak mozgása, táplálkozása és szaporodása
-            for (int i = 0; i < halak.Count; i++)
+                // Halak mozgása, táplálkozása és szaporodása
+                for (int i = 0; i < halak.Count; i++)
             {
                 var hal = halak[i];
                 if (hal.Taplalkozas(palya, algak)) // Hal megpróbál táplálkozni
                 {
                     // Ha táplálkozott, új szaporodás lehetősége
-                    if (hal.Kifejlett)
-                    {
                         hal.Szaporodas(halak);
-                    }
                 }
                 else
                 {

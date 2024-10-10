@@ -8,7 +8,7 @@ namespace SzimulacioLib.Entitasok
         public int X { get; set; }
         public int Y { get; set; }
         private int jollakottsag;
-        private const int maxJollakottsag = 10;
+        private const int maxJollakottsag = 15;
         private Random random;
 
         public Hal(int x, int y)
@@ -35,20 +35,23 @@ namespace SzimulacioLib.Entitasok
         public void Mozog(int[,] palya)
         {
             // Véletlenszerű mozgás
-            int irany = random.Next(4); // 0: fel, 1: le, 2: balra, 3: jobbra
-            int ujX = X, ujY = Y;
-
-            switch (irany)
+            for (int i = 0; i < 1; i++)
             {
-                case 0: ujX = Math.Max(0, X - 1); break;
-                case 1: ujX = Math.Min(palya.GetLength(0) - 1, X + 1); break;
-                case 2: ujY = Math.Max(0, Y - 1); break;
-                case 3: ujY = Math.Min(palya.GetLength(1) - 1, Y + 1); break;
-            }
+                int irany = random.Next(4); // 0: fel, 1: le, 2: balra, 3: jobbra
+                int ujX = X, ujY = Y;
 
-            // Frissítsük a pozíciót
-            X = ujX;
-            Y = ujY;
+                switch (irany)
+                {
+                    case 0: ujX = Math.Max(0, X - 1); break;
+                    case 1: ujX = Math.Min(palya.GetLength(0) - 1, X + 1); break;
+                    case 2: ujY = Math.Max(0, Y - 1); break;
+                    case 3: ujY = Math.Min(palya.GetLength(1) - 1, Y + 1); break;
+                }
+
+                // Frissítsük a pozíciót
+                X = ujX;
+                Y = ujY;
+            }
         }
 
         public bool EhenHal()

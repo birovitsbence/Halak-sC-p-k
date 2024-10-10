@@ -1,4 +1,8 @@
-﻿namespace SzimulacioLib.Entitasok
+﻿using System;
+using System.Collections.Generic;
+
+
+namespace SzimulacioLib.Entitasok
 {
     public class Alga
     {
@@ -21,8 +25,10 @@
             }
         }
 
-        // Ha egy hal megeszi az algát, az eltűnik
-        public void Fogyaszt()
+
+
+// Ha egy hal megeszi az algát, az eltűnik
+public void Fogyaszt()
         {
             Kifejlett = false;
         }

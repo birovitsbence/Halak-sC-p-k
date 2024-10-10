@@ -32,4 +32,4 @@ switch (sebessegValasztas)
 
 // Pálya indítása
 Palyamodell palya = new Palyamodell(meret, sebesseg);
-palya.Indit();
+palya.Szimulacio();
