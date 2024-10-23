@@ -8,7 +8,7 @@ namespace SzimulacioLib.Entitasok
         public int X { get; set; }
         public int Y { get; set; }
         private int jollakottsag;
-        private const int maxJollakottsag = 15;
+        private const int maxJollakottsag = 4;
         private Random random;
 
         public Capa(int x, int y)
@@ -25,7 +25,7 @@ namespace SzimulacioLib.Entitasok
             Hal talaltHal = halak.Find(h => Math.Abs(h.X - X) <= 1 && Math.Abs(h.Y - Y) <= 1);
             if (talaltHal != null)
             {
-                jollakottsag = Math.Min(jollakottsag + 5, maxJollakottsag); // Növeljük a jóllakottságot
+                jollakottsag = Math.Min(jollakottsag + 2, maxJollakottsag); // Növeljük a jóllakottságot
                 halak.Remove(talaltHal); // Hal eltűnik
                 return true;
             }
