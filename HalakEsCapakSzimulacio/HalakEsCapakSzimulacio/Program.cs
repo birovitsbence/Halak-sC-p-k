@@ -1,6 +1,6 @@
 ﻿using SzimulacioLib;
 using System;
-
+Console.Clear();
 Console.WriteLine("Válassz pálya méretet: ");
 Console.WriteLine("1. Kis pálya (10x10)");
 Console.WriteLine("2. Közepes pálya (20x20)");
@@ -72,8 +72,18 @@ for (int i = 0; i < futasokSzama; i++)
     }
 }
 
+//TODO: Részletes kiiratás
+
 // Összegzett statisztikák kiírása a szimuláció végén
-Console.WriteLine("\nMinden szimuláció lefutott. Részletes statisztikák:");
+Console.Clear();
+Console.WriteLine("Minden szimuláció lefutott. Részletes statisztikák:");
+//Console.WriteLine($"Szimulációk száma: {futasokszama}");
+//Console.WriteLine($"Pálya mérete: {}");
+//Console.WriteLine($"Szimuláció sebessége: {}");
+//Console.WriteLine($"Létrejött halak: {}");
+//Console.WriteLine($"Létrejött cápák: {}");
+//Console.WriteLine($"Létrejött algák: {}");
 Console.WriteLine($"Halak által elfogyasztott algák: {osszHalakEttek}");
 Console.WriteLine($"Cápák által elfogyasztott halak: {osszCapakEttek}");
-Console.WriteLine($"Futási idő: {osszFutasIdo} másodperc.");
+//Console.WriteLine($"Kifejlődött algák: {}");
+Console.WriteLine($"Futási idő: {Math.Round(osszFutasIdo,2)} másodperc.");

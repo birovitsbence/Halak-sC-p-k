@@ -87,7 +87,7 @@ namespace SzimulacioLib
         // Végső üzenet
         DateTime endTime = DateTime.Now; // Szimuláció végső időpontja
         TimeSpan duration = endTime - startTime;
-        Console.WriteLine($"A szimuláció {duration.TotalSeconds} másodpercig futott.");
+        Console.WriteLine($"A szimuláció {Math.Round(duration.TotalSeconds,2)} másodpercig futott.");
         Console.WriteLine("A szimuláció befejeződött. Nyomj meg egy gombot a kilépéshez.");
         Console.ReadKey();
     }
@@ -101,22 +101,17 @@ namespace SzimulacioLib
             {
                 for (int j = 0; j < meret; j++)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkBlue;
                     string kijelzo = Viz;
-
                     if (algak.Exists(a => a.X == i && a.Y == j))
                     {
-                        Console.ForegroundColor = ConsoleColor.Green;
                         kijelzo = Alga;
                     }
                     else if (halak.Exists(h => h.X == i && h.Y == j))
                     {
-                        Console.ForegroundColor = ConsoleColor.Cyan;
                         kijelzo = Hal;
                     }
                     else if (capak.Exists(c => c.X == i && c.Y == j))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red; 
                         kijelzo = Capa;
                     }
 
@@ -134,6 +129,8 @@ namespace SzimulacioLib
             {
                 alga.Novekszik();
             }
+
+            //TODO: esély beállítása a lehető legjobbra
 
             if (random.Next(0, 100) < 10) // 10% esély, hogy egy új alga jön létre
             {

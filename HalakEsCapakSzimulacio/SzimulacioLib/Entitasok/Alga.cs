@@ -16,6 +16,9 @@ namespace SzimulacioLib.Entitasok
             Y = y;
         }
 
+        //TODO: Növekedés beállítása a lehető legjobbra
+        //TODO: Lehet több növekedési fázist behozni pl:3,4 (Jelenlegi: 2)
+
         // Alga növekedése: több fázisban fejlődik ki
         public void Novekszik()
         {
