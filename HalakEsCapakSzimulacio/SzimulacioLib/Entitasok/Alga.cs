@@ -7,8 +7,10 @@ namespace SzimulacioLib.Entitasok
     {
         public int X { get; set; }
         public int Y { get; set; }
-        public bool Kifejlett { get; private set; } = false;
+        public bool Kifejlett { get; set; } = false;
+
         private int novekedesFazis = 0;
+        private const int maxFazis = 3; // Az algának ennyi növekedési lépés szükséges a teljes kifejlettséghez
 
         public Alga(int x, int y)
         {
@@ -16,27 +18,23 @@ namespace SzimulacioLib.Entitasok
             Y = y;
         }
 
-        //TODO: Növekedés beállítása a lehető legjobbra
-        //TODO: Lehet több növekedési fázist behozni pl:3,4 (Jelenlegi: 2)
-
-        // Alga növekedése: több fázisban fejlődik ki
         public void Novekszik()
         {
-            // Ha az alga nem kifejlett, növeljük a fázis számát
             if (!Kifejlett)
             {
                 novekedesFazis++;
-                if (novekedesFazis >= 2) // Például 2 lépés után lesz kifejlett
+                if (novekedesFazis >= maxFazis) // Eléri a maximum fázist, kifejletté válik
                 {
                     Kifejlett = true;
                 }
             }
         }
 
-        // Ha egy hal megeszi az algát, az eltűnik (ezt a pályamodell kezeli)
         public void Fogyaszt()
         {
+            // Alga visszaáll kezdeti állapotba, ha elfogyasztják
             Kifejlett = false;
+            novekedesFazis = 0;
         }
     }
 }
