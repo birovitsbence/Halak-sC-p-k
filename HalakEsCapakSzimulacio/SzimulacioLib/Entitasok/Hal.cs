@@ -8,66 +8,62 @@ namespace SzimulacioLib.Entitasok
         public int X { get; set; }
         public int Y { get; set; }
         private int jollakottsag;
-        private const int maxJollakottsag = 15;
+        private const int maxJollakottsag = 20; // Maximális jóllakottság a halak számára
         private Random random;
 
         public Hal(int x, int y)
         {
             X = x;
             Y = y;
-            jollakottsag = maxJollakottsag; // Kezdetben tele van
+            jollakottsag = maxJollakottsag; // Kezdetben maximális jóllakottsággal indul
             random = new Random();
         }
 
         public bool Taplalkozas(int[,] palya, List<Alga> algak)
         {
-            // Ellenőrizzük, hogy van-e alga a közelben
+            // Megpróbálunk egy kifejlett algát találni a hal körül, amit megehet
             Alga talaltAlga = algak.Find(a => Math.Abs(a.X - X) <= 1 && Math.Abs(a.Y - Y) <= 1 && a.Kifejlett);
             if (talaltAlga != null)
             {
-                jollakottsag = Math.Min(jollakottsag + 5, maxJollakottsag);
-                algak.Remove(talaltAlga);
+                jollakottsag = Math.Min(jollakottsag + 10, maxJollakottsag); // Jóllakottság növelése, de nem haladhatja meg a maximális értéket
+                algak.Remove(talaltAlga); // Alga eltávolítása a listából
                 return true;
             }
-            return false; // Nem talált táplálékot
+            return false;
         }
 
         public void Mozog(int[,] palya)
         {
-            // Véletlenszerű mozgás
-            for (int i = 0; i < 1; i++)
+            // Véletlenszerű mozgás a négy irány valamelyikébe
+            int irany = random.Next(4);
+            int ujX = X, ujY = Y;
+
+            switch (irany)
             {
-                int irany = random.Next(4); // 0: fel, 1: le, 2: balra, 3: jobbra
-                int ujX = X, ujY = Y;
-
-                switch (irany)
-                {
-                    case 0: ujX = Math.Max(0, X - 1); break;
-                    case 1: ujX = Math.Min(palya.GetLength(0) - 1, X + 1); break;
-                    case 2: ujY = Math.Max(0, Y - 1); break;
-                    case 3: ujY = Math.Min(palya.GetLength(1) - 1, Y + 1); break;
-                }
-
-                // Frissítsük a pozíciót
-                X = ujX;
-                Y = ujY;
+                case 0: ujX = Math.Max(0, X - 1); break;
+                case 1: ujX = Math.Min(palya.GetLength(0) - 1, X + 1); break;
+                case 2: ujY = Math.Max(0, Y - 1); break;
+                case 3: ujY = Math.Min(palya.GetLength(1) - 1, Y + 1); break;
             }
+
+            X = ujX;
+            Y = ujY;
         }
 
         public bool EhenHal()
         {
-            if (jollakottsag <= 0)
+            // Csökkenti a jóllakottságot; ha eléri a 0-t, a hal meghal
+            if (jollakottsag <= 2)
             {
-                return true; // Éhen halt
+                return true; // Hal éhen halt
             }
-
-            jollakottsag--;
-            return false; // Él
+            jollakottsag -= 2;
+            return false;
         }
 
-        public void Szaporodas(List<Hal> halak)
+        public void Szaporodas(List<Hal> halak, int palyaMeret)
         {
-            // Szaporodás, ha van üres mező
+            // Szaporodás üres mezőre, ha két hal szomszédos mezőkön áll
             List<(int x, int y)> szomszedok = new List<(int, int)>
             {
                 (X - 1, Y), (X + 1, Y), (X, Y - 1), (X, Y + 1)
@@ -75,13 +71,22 @@ namespace SzimulacioLib.Entitasok
 
             foreach (var (x, y) in szomszedok)
             {
-                if (x >= 0 && x < 30 && y >= 0 && y < 30 && !halak.Exists(h => h.X == x && h.Y == y))
+                // Ellenőrzi, hogy a szomszédos mező üres-e, és benne van-e a pálya méretén belül
+                if (x >= 0 && x < palyaMeret && y >= 0 && y < palyaMeret &&
+                    !halak.Exists(h => h.X == x && h.Y == y))
                 {
-                    halak.Add(new Hal(x, y)); // Új hal létrejön
+                    halak.Add(new Hal(x, y)); // Új hal létrehozása
+
+                    // Második hal létrehozása 20% eséllyel
+                    if (random.Next(0, 100) < 20)
+                    {
+                        halak.Add(new Hal(x, y));
+                    }
                     break;
                 }
             }
         }
-        public bool Kifejlett => jollakottsag > 0;
+
+        public bool Kifejlett => jollakottsag > 0; // Igaz, ha a hal életben van
     }
 }

@@ -1,7 +1,6 @@
 ﻿using SzimulacioLib.Entitasok;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 
 namespace SzimulacioLib
 {
@@ -14,37 +13,23 @@ namespace SzimulacioLib
         private int meret;
         private int sebesseg;
         private Random random;
-        public const string Capa = "🐟";
-        public const string Hal = "🐠";
-        public const string Alga = "🌿";
-        public const string Viz = "🔵";
+        private FastConsole fastConsole;
 
-        // Új mezők a statisztikákhoz
+        // Unicode karakterek beállítása alapértelmezettként a különböző entitásokhoz
+        public string Capa { get; private set; } = "🐟";
+        public string Hal { get; private set; } = "🐠";
+        public string Alga { get; private set; } = "🌿";
+        public string Viz { get; private set; } = "🔵";
+
         public int HalakAltalElfogyasztottAlga { get; private set; }
         public int CapakAltalElfogyasztottHal { get; private set; }
 
-        public Palyamodell(int meret, int sebesseg)
-        {
-            this.meret = meret;
-            this.sebesseg = sebesseg;
-            palya = new int[meret, meret];
-            algak = new List<Alga>();
-            halak = new List<Hal>();
-            capak = new List<Capa>();
-            random = new Random();
-
-            // Statisztikák alaphelyzetbe állítása
-            HalakAltalElfogyasztottAlga = 0;
-            CapakAltalElfogyasztottHal = 0;
-
-            KezdetiAllapot();
-        }
-
         private void KezdetiAllapot()
         {
-            int algaSzam = meret * meret / 6;
+            // Az entitások kezdeti száma a pálya méretének függvényében
+            int algaSzam = meret * meret / 2;
             int halSzam = meret * meret / 6;
-            int capaSzam = meret * meret / 60;
+            int capaSzam = meret * meret / 40;
 
             for (int i = 0; i < algaSzam; i++)
             {
@@ -62,157 +47,167 @@ namespace SzimulacioLib
             }
         }
 
-        public void Szimulacio()
-    {
-        int lepesSzamlalo = 0;
-        DateTime startTime = DateTime.Now; // Szimuláció kezdeti időpontja
-
-        while (halak.Count > 0 || capak.Count > 0) // Futás, amíg van hal vagy cápa
+        public Palyamodell(int meret, int sebesseg)
         {
-            Console.Clear();
+            this.meret = meret;
+            this.sebesseg = sebesseg;
+            palya = new int[meret, meret];
+            algak = new List<Alga>();
+            halak = new List<Hal>();
+            capak = new List<Capa>();
+            random = new Random();
+            fastConsole = new FastConsole(meret * 2, meret);
 
-            // Megjelenítés
-            Megjelenit();
+            if (OperatingSystem.IsWindows())
+            {
+                Capa = "C";
+                Hal = "H";
+                Alga = "A";
+                Viz = ".";
+            }
 
-            // Lépés szimulációban
-            Lepes();
+            HalakAltalElfogyasztottAlga = 0;
+            CapakAltalElfogyasztottHal = 0;
 
-            // Lépésszámláló
-            lepesSzamlalo++;
-
-            // Lassítás
-            System.Threading.Thread.Sleep(sebesseg);
+            KezdetiAllapot(); // Inicializálja a pályát a kezdeti állapotokkal
         }
 
-        // Végső üzenet
-        DateTime endTime = DateTime.Now; // Szimuláció végső időpontja
-        TimeSpan duration = endTime - startTime;
-        Console.WriteLine($"A szimuláció {duration.TotalSeconds} másodpercig futott.");
-        Console.WriteLine("A szimuláció befejeződött. Nyomj meg egy gombot a kilépéshez.");
-        Console.ReadKey();
-    }
+        public double Szimulacio()
+        {
+            DateTime startTime = DateTime.Now;
+
+            while (halak.Count > 0 || capak.Count > 0)
+            {
+                Megjelenit();
+                Lepes();
+                System.Threading.Thread.Sleep(sebesseg);
+            }
+
+            DateTime endTime = DateTime.Now;
+            TimeSpan duration = endTime - startTime;
+            Console.WriteLine($"\n\nA szimuláció {Math.Round(duration.TotalSeconds, 2)} másodpercig futott.");
+            Console.WriteLine("A szimuláció befejeződött. Nyomj meg egy gombot a kilépéshez.");
+            Console.ReadKey();
+
+            return duration.TotalSeconds; // A teljes szimuláció futási idejét adja vissza
+        }
 
         private void Megjelenit()
         {
-            // Kurzor pozíciójának visszaállítása a kezdőpontra
-            Console.SetCursorPosition(0, 0); 
+            fastConsole.Clear();
 
             for (int i = 0; i < meret; i++)
             {
                 for (int j = 0; j < meret; j++)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkBlue;
                     string kijelzo = Viz;
+                    ConsoleColor color = ConsoleColor.Blue;
 
                     if (algak.Exists(a => a.X == i && a.Y == j))
                     {
-                        Console.ForegroundColor = ConsoleColor.Green;
                         kijelzo = Alga;
+                        color = ConsoleColor.Green;
                     }
                     else if (halak.Exists(h => h.X == i && h.Y == j))
                     {
-                        Console.ForegroundColor = ConsoleColor.Cyan;
                         kijelzo = Hal;
+                        color = ConsoleColor.Magenta;
                     }
                     else if (capak.Exists(c => c.X == i && c.Y == j))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red; 
                         kijelzo = Capa;
+                        color = ConsoleColor.Red;
                     }
 
-                    // Karakter kiírása színnel együtt
-                    Console.Write(kijelzo + " ");
-                    Console.ResetColor(); // Szín visszaállítása az alapértelmezettre
+                    fastConsole.WriteAt(j * 2, i, kijelzo, color);
                 }
-                Console.WriteLine();
             }
+
+            fastConsole.Render();
         }
+
         private void Lepes()
         {
-            // Algák növekedése
+            // Algák növekedése és új alga létrejövésének megnövelt esélye
             foreach (var alga in algak)
             {
                 alga.Novekszik();
             }
 
-            if (random.Next(0, 100) < 10) // 10% esély, hogy egy új alga jön létre
+            if (random.Next(0, 100) < 8)
             {
                 List<(int x, int y)> uresMezok = new List<(int, int)>();
                 for (int i = 0; i < palya.GetLength(0); i++)
                 {
                     for (int j = 0; j < palya.GetLength(1); j++)
                     {
-                        // Ellenőrizzük, hogy a mező üres-e
                         if (!algak.Exists(a => a.X == i && a.Y == j) &&
                             !halak.Exists(h => h.X == i && h.Y == j) &&
                             !capak.Exists(c => c.X == i && c.Y == j))
                         {
-                            uresMezok.Add((i, j)); // Ha üres, adjuk hozzá az üres mezők listájához
+                            uresMezok.Add((i, j));
                         }
                     }
                 }
 
-                if (uresMezok.Count > 0) // Ha van üres mező, akkor létrejöhet alga
+                if (uresMezok.Count > 0)
                 {
                     var uresMezo = uresMezok[random.Next(uresMezok.Count)];
                     algak.Add(new Alga(uresMezo.x, uresMezo.y));
-                    Console.WriteLine("Új alga jött létre a koordinátán: (" + uresMezo.x + ", " + uresMezo.y + ")");
                 }
             }
 
-            // Halak mozgása, táplálkozása és szaporodása
+            // Halak táplálkozása, mozgása és gyakrabban történő szaporodása
             for (int i = 0; i < halak.Count; i++)
             {
                 var hal = halak[i];
-                if (hal.Taplalkozas(palya, algak)) // Hal megpróbál táplálkozni
+                if (hal.Taplalkozas(palya, algak))
                 {
-                    // Növeljük az elfogyasztott algák számát
                     HalakAltalElfogyasztottAlga++;
-
-                    // Alga eltávolítása a listából
                     var alga = algak.Find(a => a.X == hal.X && a.Y == hal.Y);
                     if (alga != null)
                     {
-                        algak.Remove(alga); // Elfogyasztott alga eltávolítása
+                        algak.Remove(alga);
                     }
 
-                    // Ha táplálkozott, új szaporodás lehetősége
-                    hal.Szaporodas(halak);
+                    // Gyakoribb szaporodás a halak esetében
+                    if (random.Next(0, 100) < 30)
+                    {
+                        hal.Szaporodas(halak, meret);
+                    }
                 }
                 else
                 {
-                    hal.Mozog(palya); // Hal mozgása
+                    hal.Mozog(palya);
                 }
 
-                // Halak elhalálozása
                 if (hal.EhenHal())
                 {
                     halak.Remove(hal);
-                    i--; // A lista mérete változik, ezért csökkenteni kell az indexet
+                    i--;
                 }
             }
 
-            // Cápák mozgása, táplálkozása és szaporodása
+            // Cápák táplálkozása, mozgása és csökkentett táplálékbevitel
             for (int i = 0; i < capak.Count; i++)
             {
                 var capa = capak[i];
-                if (capa.Taplalkozas(palya, halak)) // Cápa megpróbál táplálkozni
+                if (capa.Taplalkozas(palya, halak))
                 {
-                    // Növeljük az elfogyasztott halak számát
                     CapakAltalElfogyasztottHal++;
-
-                    // Ha táplálkozott, új szaporodás lehetősége
                     if (capa.Kifejlett)
                     {
-                        capa.Szaporodas(capak);
+                        if (random.Next(0, 100) < 20) // 20% esély a szaporodásra
+                        {
+                            capa.Szaporodas(capak, meret); // A pálya méretét is átadjuk, ha szükséges
+                        }
                     }
                 }
                 else
                 {
-                    capa.Mozog(palya); // Cápa mozgása
+                    capa.Mozog(palya);
                 }
 
-                // Cápák elhalálozása
                 if (capa.EhenHal())
                 {
                     capak.Remove(capa);
